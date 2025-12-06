@@ -1,3 +1,4 @@
+<!-- app/src/main/res/values/strings.xml -->
 <resources>
     <string name="app_name">ViaRapida</string>
 
@@ -11,6 +12,9 @@
     <string name="register_button">Registrarse</string>
     <string name="no_account">¿No tienes cuenta?</string>
     <string name="have_account">¿Ya tienes cuenta?</string>
+
+    <!-- ⬇️ AGREGAR ESTA LÍNEA CON TU WEB CLIENT ID REAL -->
+    <string name="default_web_client_id">505257650362-XXXXXXXXXXXXXXXXXX.apps.googleusercontent.com</string>
 
     <!-- Home -->
     <string name="home_title">ViaRapida</string>

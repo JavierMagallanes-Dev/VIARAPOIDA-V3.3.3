@@ -1,8 +1,11 @@
+// app/src/main/java/com/viarapida/app/ui/screens/auth/LoginViewModel.kt
+
 package com.viarapida.app.ui.screens.auth
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.AuthCredential
 import com.viarapida.app.data.model.User
 import com.viarapida.app.data.repository.AuthRepository
 import com.viarapida.app.di.AppModule
@@ -73,6 +76,36 @@ class LoginViewModel(
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         generalError = error.message ?: "Error al iniciar sesión"
+                    )
+                }
+        }
+    }
+
+    // ⬇️ ESTA FUNCIÓN DEBE ESTAR ASÍ
+    fun loginWithGoogle(credential: AuthCredential) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, generalError = "")
+
+            Log.d(TAG, "Intentando login con Google")
+
+            authRepository.loginWithGoogle(credential)
+                .onSuccess { user ->
+                    Log.d(TAG, "Login con Google exitoso para: ${user.name}")
+
+                    // ⬇️ IMPORTANTE: Actualizar TODOS los campos necesarios
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        loginSuccess = true,  // ⬅️ ESTE ES CRÍTICO
+                        user = user,
+                        generalError = ""
+                    )
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Error en login con Google: ${error.message}", error)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        loginSuccess = false,  // ⬅️ Asegurar que sea false en error
+                        generalError = error.message ?: "Error al iniciar sesión con Google"
                     )
                 }
         }

@@ -99,4 +99,10 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // Google Sign-In (AGREGAR ESTAS LÍNEAS)
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    // Ya las tienes, solo verifica que estén:
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
 }
