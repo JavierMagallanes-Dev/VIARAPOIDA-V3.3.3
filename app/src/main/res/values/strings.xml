@@ -1,0 +1,80 @@
+<resources>
+    <string name="app_name">ViaRapida</string>
+
+    <!-- Auth -->
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="register_title">Crear Cuenta</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="name">Nombre Completo</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Registrarse</string>
+    <string name="no_account">¿No tienes cuenta?</string>
+    <string name="have_account">¿Ya tienes cuenta?</string>
+
+    <!-- Home -->
+    <string name="home_title">ViaRapida</string>
+    <string name="search_routes">Buscar Rutas</string>
+    <string name="my_tickets">Mis Pasajes</string>
+    <string name="admin_panel">Panel Admin</string>
+    <string name="logout">Cerrar Sesión</string>
+
+    <!-- Search -->
+    <string name="search_title">Buscar Rutas</string>
+    <string name="origin">Origen</string>
+    <string name="destination">Destino</string>
+    <string name="search">Buscar</string>
+    <string name="available_routes">Rutas Disponibles</string>
+    <string name="no_routes">No se encontraron rutas</string>
+    <string name="select_route">Seleccionar</string>
+
+    <!-- Seats -->
+    <string name="seat_selection_title">Selección de Asiento</string>
+    <string name="available">Disponible</string>
+    <string name="occupied">Ocupado</string>
+    <string name="selected">Seleccionado</string>
+    <string name="continue_button">Continuar</string>
+    <string name="select_seat">Selecciona un asiento</string>
+
+    <!-- Purchase -->
+    <string name="purchase_title">Datos del Pasajero</string>
+    <string name="passenger_name">Nombre del Pasajero</string>
+    <string name="passenger_dni">DNI del Pasajero</string>
+    <string name="purchase_summary">Resumen de Compra</string>
+    <string name="seat_number">Asiento N°</string>
+    <string name="total">Total</string>
+    <string name="confirm_purchase">Confirmar Compra</string>
+
+    <!-- Ticket -->
+    <string name="ticket_detail_title">Detalle del Pasaje</string>
+    <string name="ticket_code">Código de Pasaje</string>
+    <string name="passenger">Pasajero</string>
+    <string name="route">Ruta</string>
+    <string name="departure">Salida</string>
+    <string name="seat">Asiento</string>
+    <string name="status">Estado</string>
+    <string name="purchase_date">Fecha de Compra</string>
+    <string name="back_home">Volver al Inicio</string>
+
+    <!-- My Tickets -->
+    <string name="my_tickets_title">Mis Pasajes</string>
+    <string name="no_tickets">No tienes pasajes registrados</string>
+
+    <!-- Admin -->
+    <string name="admin_title">Panel de Administración</string>
+    <string name="total_tickets">Total de Pasajes</string>
+    <string name="all_tickets">Todos los Pasajes</string>
+    <string name="mark_as_used">Marcar como Usado</string>
+
+    <!-- Status -->
+    <string name="active">Activo</string>
+    <string name="used">Usado</string>
+
+    <!-- Errors -->
+    <string name="error_empty_field">Este campo no puede estar vacío</string>
+    <string name="error_invalid_email">Correo electrónico inválido</string>
+    <string name="error_invalid_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_invalid_dni">DNI debe tener 8 dígitos</string>
+    <string name="error_same_origin_destination">Origen y destino no pueden ser iguales</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+</resources>

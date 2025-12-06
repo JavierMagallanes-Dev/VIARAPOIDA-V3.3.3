@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "505257650362",
+    "project_id": "viarapida-85b0b",
+    "storage_bucket": "viarapida-85b0b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:505257650362:android:07ef674cebaedf73c63a83",
+        "android_client_info": {
+          "package_name": "com.viarapida.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL60tHXkDpzJTRE_7RF1v7yEfwb8tS9rU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
