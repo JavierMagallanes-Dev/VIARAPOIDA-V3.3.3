@@ -1,7 +1,10 @@
 package com.viarapida.app.ui.screens.purchase
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -10,16 +13,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.viarapida.app.data.model.PaymentMethod
 import com.viarapida.app.data.model.PaymentType
 import com.viarapida.app.ui.components.CustomButton
 import com.viarapida.app.ui.components.CustomTextField
 import com.viarapida.app.ui.components.LoadingDialog
+import androidx.compose.foundation.background
+import androidx.compose.ui.text.font.FontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +51,21 @@ fun PurchaseScreen(
         }
     }
 
-    if (uiState.isLoading) {
+    // Loading dialog mejorado con estado de pago
+    uiState.paymentProcessState?.let { processState ->
+        if (processState.isProcessing) {
+            LoadingDialog(
+                message = processState.message,
+                progress = processState.progress,
+                subtitle = if (processState.estimatedTimeSeconds > 0) {
+                    "Tiempo estimado: ${processState.estimatedTimeSeconds}s"
+                } else null
+            )
+        }
+    }
+
+// Loading dialog básico para otras operaciones
+    if (uiState.isLoading && uiState.paymentProcessState == null) {
         LoadingDialog(message = "Procesando compra...")
     }
 
@@ -89,6 +110,60 @@ fun PurchaseScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // Banner de Modo Demo
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFFFF3CD) // Amarillo suave
+                ),
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(2.dp, Color(0xFFFFCA28))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Icono de laboratorio
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = Color(0xFFFFCA28).copy(alpha = 0.3f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "🧪",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+
+                    // Texto del banner
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "MODO DEMOSTRACIÓN",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF856404)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Esta es una simulación de pago. No se procesará dinero real.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF856404),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             // Error
             if (uiState.error.isNotEmpty()) {
                 Card(
@@ -217,6 +292,76 @@ fun PurchaseScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Card con tarjetas de prueba
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "💳 Tarjetas de Prueba Disponibles",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Lista de tarjetas
+                        TestCardItem(
+                            number = "4111 1111 1111 1111",
+                            status = "✅",
+                            description = "VISA - Siempre aprobada"
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        TestCardItem(
+                            number = "5555 5555 5555 4444",
+                            status = "✅",
+                            description = "Mastercard - Siempre aprobada"
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        TestCardItem(
+                            number = "4000 0000 0000 0002",
+                            status = "❌",
+                            description = "VISA - Siempre rechazada"
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Nota adicional
+                        Text(
+                            text = "• CVV: Cualquier 3 dígitos (ej: 123)\n• Fecha: Cualquier fecha futura (ej: 12/25)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -460,6 +605,45 @@ private fun PaymentMethodDialogItem(
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
+        }
+    }
+    @Composable
+    private fun TestCardItem(
+        number: String,
+        status: String,
+        description: String
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = number,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = status,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

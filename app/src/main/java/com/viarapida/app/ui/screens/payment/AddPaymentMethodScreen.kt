@@ -1,6 +1,7 @@
 package com.viarapida.app.ui.screens.payment
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,9 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.viarapida.app.data.model.PaymentType
 import com.viarapida.app.ui.components.CustomButton
@@ -62,6 +65,48 @@ fun AddPaymentMethodScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // Banner de Modo Demo
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFE3F2FD) // Azul suave
+                ),
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Modo Demostración",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Los métodos de pago agregados son solo para pruebas. No se guardará información bancaria real.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
             // Selector de tipo de pago
             Text(
                 text = "Tipo de Método",
@@ -250,6 +295,46 @@ private fun CardForm(
                 isPassword = true,
                 modifier = Modifier.weight(1f)
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+// Card con ejemplos de tarjetas de prueba
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+                ),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "💡", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = "Tarjetas de Prueba",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "• 4111 1111 1111 1111 → Siempre aprobada\n" +
+                                "• 5555 5555 5555 4444 → Siempre aprobada\n" +
+                                "• 4000 0000 0000 0002 → Siempre rechazada",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        lineHeight = 18.sp,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

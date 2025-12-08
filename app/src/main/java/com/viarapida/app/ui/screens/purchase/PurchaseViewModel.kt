@@ -242,102 +242,204 @@ class PurchaseViewModel(
         seatNumber: Int,
         currentState: PurchaseUiState
     ) {
-        // SIMULACIÓN DE PAGO - En producción aquí irían las integraciones reales
-        // con Yape, Plin, o pasarelas de pago
+        try {
+            // Paso 1: VALIDATING (500ms)
+            _uiState.value = _uiState.value.copy(
+                paymentProcessState = PaymentProcessState(
+                    isProcessing = true,
+                    currentStep = PaymentStep.VALIDATING,
+                    progress = 0.25f,
+                    message = PaymentStep.VALIDATING.displayMessage,
+                    estimatedTimeSeconds = 2
+                )
+            )
+            kotlinx.coroutines.delay(500)
 
-        // Simulamos un delay de procesamiento
-        kotlinx.coroutines.delay(2000)
+            // Paso 2: AUTHORIZING (500ms)
+            _uiState.value = _uiState.value.copy(
+                paymentProcessState = PaymentProcessState(
+                    isProcessing = true,
+                    currentStep = PaymentStep.AUTHORIZING,
+                    progress = 0.50f,
+                    message = PaymentStep.AUTHORIZING.displayMessage,
+                    estimatedTimeSeconds = 1
+                )
+            )
+            kotlinx.coroutines.delay(500)
 
-        // Simulamos éxito (95% de las veces)
-        val paymentSuccess = (0..100).random() > 5
+            // Paso 3: PROCESSING (500ms)
+            _uiState.value = _uiState.value.copy(
+                paymentProcessState = PaymentProcessState(
+                    isProcessing = true,
+                    currentStep = PaymentStep.PROCESSING,
+                    progress = 0.75f,
+                    message = PaymentStep.PROCESSING.displayMessage,
+                    estimatedTimeSeconds = 1
+                )
+            )
+            kotlinx.coroutines.delay(500)
 
-        if (paymentSuccess) {
-            // Pago exitoso
-            Log.d(TAG, "Pago procesado exitosamente")
+            // Paso 4: COMPLETING (500ms)
+            _uiState.value = _uiState.value.copy(
+                paymentProcessState = PaymentProcessState(
+                    isProcessing = true,
+                    currentStep = PaymentStep.COMPLETING,
+                    progress = 0.95f,
+                    message = PaymentStep.COMPLETING.displayMessage,
+                    estimatedTimeSeconds = 0
+                )
+            )
+            kotlinx.coroutines.delay(500)
 
-            // Actualizar estado de transacción a COMPLETED
-            paymentRepository.updateTransactionStatus(
-                transactionId,
-                TransactionStatus.COMPLETED
-            ).onSuccess {
-                // Crear ticket
-                val ticket = Ticket(
-                    userId = user.id,
-                    userName = user.name,
-                    routeId = route.id,
-                    passengerName = currentState.passengerName,
-                    passengerDNI = currentState.passengerDNI,
-                    seatNumber = seatNumber,
-                    origin = route.origin,
-                    destination = route.destination,
-                    departureTime = route.departureTime,
-                    price = route.price,
-                    purchaseDate = Timestamp.now(),
-                    status = Constants.STATUS_ACTIVE
+            // Paso 5: Determinar resultado según tarjeta
+            // Paso 5: Determinar resultado según tarjeta
+            val cardNumber = currentState.selectedPaymentMethod?.cardNumber ?: ""
+            val fullCardNumber = currentState.selectedPaymentMethod?.let {
+                // Reconstruir número completo si solo tenemos últimos 4 dígitos
+                when (it.type) {
+                    PaymentType.CARD -> {
+                        // Si es una tarjeta de prueba conocida
+                        when (cardNumber) {
+                            "1111" -> "4111111111111111" // Visa aprobada
+                            "4444" -> "5555555555554444" // Mastercard aprobada
+                            "0002" -> "4000000000000002" // Visa rechazada
+                            else -> ""
+                        }
+                    }
+                    else -> ""
+                }
+            } ?: ""
+
+            val paymentSuccess = when {
+                // Tarjetas de prueba que siempre fallan
+                fullCardNumber.endsWith("0002") || cardNumber == "0002" -> {
+                    Log.d(TAG, "Tarjeta de prueba - RECHAZO FORZADO")
+                    false
+                }
+                // Tarjetas de prueba que siempre aprueban
+                fullCardNumber.contains("4111") || cardNumber == "1111" ||
+                        fullCardNumber.contains("5555") || cardNumber == "4444" -> {
+                    Log.d(TAG, "Tarjeta de prueba - APROBACIÓN FORZADA")
+                    true
+                }
+                // Resto: 95% de éxito
+                else -> {
+                    Log.d(TAG, "Tarjeta normal - Probabilidad 95%")
+                    (0..100).random() > 5
+                }
+            }
+
+            Log.d(TAG, "Procesando pago - Tarjeta: $cardNumber, Resultado: ${if(paymentSuccess) "ÉXITO" else "FALLO"}")
+
+            if (paymentSuccess) {
+                // PAGO EXITOSO
+                Log.d(TAG, "Pago procesado exitosamente")
+
+                _uiState.value = _uiState.value.copy(
+                    paymentProcessState = PaymentProcessState(
+                        isProcessing = false,
+                        currentStep = PaymentStep.SUCCESS,
+                        progress = 1.0f,
+                        message = PaymentStep.SUCCESS.displayMessage,
+                        estimatedTimeSeconds = 0
+                    )
                 )
 
-                ticketRepository.createTicket(ticket)
-                    .onSuccess { ticketId ->
-                        Log.d(TAG, "Ticket creado: $ticketId")
+                // Actualizar estado de transacción a COMPLETED
+                paymentRepository.updateTransactionStatus(
+                    transactionId,
+                    TransactionStatus.COMPLETED
+                ).onSuccess {
+                    // Crear ticket
+                    val ticket = Ticket(
+                        userId = user.id,
+                        userName = user.name,
+                        routeId = route.id,
+                        passengerName = currentState.passengerName,
+                        passengerDNI = currentState.passengerDNI,
+                        seatNumber = seatNumber,
+                        origin = route.origin,
+                        destination = route.destination,
+                        departureTime = route.departureTime,
+                        price = route.price,
+                        purchaseDate = Timestamp.now(),
+                        status = Constants.STATUS_ACTIVE
+                    )
 
-                        // Actualizar transacción con el ticketId
-                        paymentRepository.getTransactionById(transactionId)
-                            .onSuccess { trans ->
-                                trans?.let {
-                                    paymentRepository.createTransaction(
-                                        it.copy(ticketId = ticketId)
+                    ticketRepository.createTicket(ticket)
+                        .onSuccess { ticketId ->
+                            Log.d(TAG, "Ticket creado: $ticketId")
+
+                            // Actualizar asientos ocupados
+                            val updatedOccupiedSeats = route.occupiedSeats + seatNumber
+                            routeRepository.updateOccupiedSeats(route.id, updatedOccupiedSeats)
+                                .onSuccess {
+                                    Log.d(TAG, "Asientos actualizados correctamente")
+                                    kotlinx.coroutines.delay(500) // Mostrar mensaje de éxito
+                                    _uiState.value = _uiState.value.copy(
+                                        isLoading = false,
+                                        paymentProcessState = null,
+                                        purchaseSuccess = true,
+                                        ticketId = ticketId
                                     )
                                 }
-                            }
+                                .onFailure { error ->
+                                    Log.e(TAG, "Error actualizando asientos: ${error.message}", error)
+                                    _uiState.value = _uiState.value.copy(
+                                        isLoading = false,
+                                        paymentProcessState = null,
+                                        error = "Error al actualizar asientos: ${error.message}"
+                                    )
+                                }
+                        }
+                        .onFailure { error ->
+                            Log.e(TAG, "Error creando ticket: ${error.message}", error)
+                            paymentRepository.updateTransactionStatus(
+                                transactionId,
+                                TransactionStatus.FAILED,
+                                "Error creando ticket: ${error.message}"
+                            )
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                paymentProcessState = null,
+                                error = "Error al crear el ticket: ${error.message}"
+                            )
+                        }
+                }
+            } else {
+                // PAGO FALLIDO
+                Log.e(TAG, "Pago rechazado (simulado)")
 
-                        // Actualizar asientos ocupados
-                        val updatedOccupiedSeats = route.occupiedSeats + seatNumber
-                        routeRepository.updateOccupiedSeats(route.id, updatedOccupiedSeats)
-                            .onSuccess {
-                                Log.d(TAG, "Asientos actualizados correctamente")
-                                _uiState.value = _uiState.value.copy(
-                                    isLoading = false,
-                                    purchaseSuccess = true,
-                                    ticketId = ticketId
-                                )
-                            }
-                            .onFailure { error ->
-                                Log.e(TAG, "Error actualizando asientos: ${error.message}", error)
-                                _uiState.value = _uiState.value.copy(
-                                    isLoading = false,
-                                    error = "Error al actualizar asientos: ${error.message}"
-                                )
-                            }
-                    }
-                    .onFailure { error ->
-                        Log.e(TAG, "Error creando ticket: ${error.message}", error)
+                _uiState.value = _uiState.value.copy(
+                    paymentProcessState = PaymentProcessState(
+                        isProcessing = false,
+                        currentStep = PaymentStep.FAILED,
+                        progress = 1.0f,
+                        message = PaymentStep.FAILED.displayMessage,
+                        estimatedTimeSeconds = 0
+                    )
+                )
 
-                        // Marcar transacción como fallida
-                        paymentRepository.updateTransactionStatus(
-                            transactionId,
-                            TransactionStatus.FAILED,
-                            "Error creando ticket: ${error.message}"
-                        )
+                kotlinx.coroutines.delay(1000) // Mostrar mensaje de error
 
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            error = "Error al crear el ticket: ${error.message}"
-                        )
-                    }
+                paymentRepository.updateTransactionStatus(
+                    transactionId,
+                    TransactionStatus.FAILED,
+                    "Pago rechazado: Fondos insuficientes (simulado)"
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    paymentProcessState = null,
+                    error = "❌ Pago rechazado\n\nRazón: Fondos insuficientes (simulado)\n\nIntenta con otra tarjeta de prueba:\n• 4111 1111 1111 1111 (Aprobada)\n• 5555 5555 5555 4444 (Aprobada)"
+                )
             }
-        } else {
-            // Pago fallido (simulado)
-            Log.e(TAG, "Pago rechazado (simulado)")
-
-            paymentRepository.updateTransactionStatus(
-                transactionId,
-                TransactionStatus.FAILED,
-                "Pago rechazado por el procesador"
-            )
-
+        } catch (e: Exception) {
+            Log.e(TAG, "Error en procesamiento de pago: ${e.message}", e)
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
-                error = "El pago fue rechazado. Por favor intenta con otro método de pago."
+                paymentProcessState = null,
+                error = "Error al procesar el pago: ${e.message}"
             )
         }
     }
@@ -356,6 +458,9 @@ data class PurchaseUiState(
     // Pagos
     val paymentMethods: List<PaymentMethod> = emptyList(),
     val selectedPaymentMethod: PaymentMethod? = null,
+
+    // NUEVO: Estado del procesamiento de pago
+    val paymentProcessState: PaymentProcessState? = null,
 
     val error: String = "",
     val purchaseSuccess: Boolean = false,
