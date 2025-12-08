@@ -14,7 +14,7 @@
     <string name="have_account">¿Ya tienes cuenta?</string>
 
     <!-- ⬇️ AGREGAR ESTA LÍNEA CON TU WEB CLIENT ID REAL -->
-    <string name="default_web_client_id">505257650362-XXXXXXXXXXXXXXXXXX.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">505257650362-fjnrt8qcgdidivaq51lmj1lkvis44ic1.apps.googleusercontent.com</string>
 
     <!-- Home -->
     <string name="home_title">ViaRapida</string>
