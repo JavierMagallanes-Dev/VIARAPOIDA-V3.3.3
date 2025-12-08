@@ -25,8 +25,6 @@ import com.viarapida.app.data.model.PaymentType
 import com.viarapida.app.ui.components.CustomButton
 import com.viarapida.app.ui.components.CustomTextField
 import com.viarapida.app.ui.components.LoadingDialog
-import androidx.compose.foundation.background
-import androidx.compose.ui.text.font.FontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +62,7 @@ fun PurchaseScreen(
         }
     }
 
-// Loading dialog básico para otras operaciones
+    // Loading dialog básico para otras operaciones
     if (uiState.isLoading && uiState.paymentProcessState == null) {
         LoadingDialog(message = "Procesando compra...")
     }
@@ -164,6 +162,7 @@ fun PurchaseScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
             // Error
             if (uiState.error.isNotEmpty()) {
                 Card(
@@ -607,43 +606,45 @@ private fun PaymentMethodDialogItem(
             }
         }
     }
-    @Composable
-    private fun TestCardItem(
-        number: String,
-        status: String,
-        description: String
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                    shape = MaterialTheme.shapes.small
-                )
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = number,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+}
 
+// ✅ COMPOSABLE MOVIDO FUERA - AHORA ESTÁ AL FINAL DEL ARCHIVO
+@Composable
+private fun TestCardItem(
+    number: String,
+    status: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = status,
-                style = MaterialTheme.typography.titleMedium
+                text = number,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        Text(
+            text = status,
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }

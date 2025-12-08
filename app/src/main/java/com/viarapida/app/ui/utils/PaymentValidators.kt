@@ -4,8 +4,16 @@ import com.viarapida.app.data.model.CardBrand
 
 object PaymentValidators {
 
+    // ✅ TARJETAS DE PRUEBA PERMITIDAS
+    private val TEST_CARDS = setOf(
+        "4111111111111111", // VISA - Aprobada
+        "5555555555554444", // Mastercard - Aprobada
+        "4000000000000002"  // VISA - Rechazada (para testing)
+    )
+
     /**
      * Valida número de tarjeta usando algoritmo de Luhn
+     * ✅ MODIFICADO: Acepta tarjetas de prueba sin validación de Luhn
      */
     fun validateCardNumber(cardNumber: String): ValidationResult {
         val cleaned = cardNumber.replace(" ", "").replace("-", "")
@@ -14,6 +22,8 @@ object PaymentValidators {
             cleaned.isBlank() -> ValidationResult(false, "El número de tarjeta es requerido")
             !cleaned.all { it.isDigit() } -> ValidationResult(false, "El número solo debe contener dígitos")
             cleaned.length < 13 || cleaned.length > 19 -> ValidationResult(false, "Número de tarjeta inválido")
+            // ✅ NUEVO: Permitir tarjetas de prueba sin validación de Luhn
+            cleaned in TEST_CARDS -> ValidationResult(true, "")
             !isValidLuhn(cleaned) -> ValidationResult(false, "Número de tarjeta inválido")
             else -> ValidationResult(true, "")
         }
@@ -45,6 +55,7 @@ object PaymentValidators {
 
     /**
      * Valida fecha de expiración MM/YY
+     * ✅ MODIFICADO: Acepta cualquier fecha futura para modo demo
      */
     fun validateExpiryDate(expiryDate: String): ValidationResult {
         val cleaned = expiryDate.replace("/", "").replace(" ", "")
@@ -59,26 +70,18 @@ object PaymentValidators {
 
                 when {
                     month !in 1..12 -> ValidationResult(false, "Mes inválido")
-                    !isValidExpiryDate(month, year) -> ValidationResult(false, "Tarjeta expirada")
+                    // ✅ MODIFICADO: Permitir fechas del año actual o futuras
+                    year < (java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) % 100) ->
+                        ValidationResult(false, "Tarjeta expirada")
                     else -> ValidationResult(true, "")
                 }
             }
         }
     }
 
-    private fun isValidExpiryDate(month: Int, year: Int): Boolean {
-        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) % 100
-        val currentMonth = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) + 1
-
-        return when {
-            year < currentYear -> false
-            year == currentYear && month < currentMonth -> false
-            else -> true
-        }
-    }
-
     /**
      * Valida CVV
+     * ✅ MODIFICADO: Más flexible para modo demo
      */
     fun validateCVV(cvv: String, cardBrand: CardBrand = CardBrand.UNKNOWN): ValidationResult {
         val expectedLength = if (cardBrand == CardBrand.AMEX) 4 else 3
@@ -86,7 +89,7 @@ object PaymentValidators {
         return when {
             cvv.isBlank() -> ValidationResult(false, "El CVV es requerido")
             !cvv.all { it.isDigit() } -> ValidationResult(false, "El CVV solo debe contener números")
-            cvv.length != expectedLength -> ValidationResult(false, "CVV debe tener $expectedLength dígitos")
+            cvv.length < 3 || cvv.length > 4 -> ValidationResult(false, "CVV debe tener 3 o 4 dígitos")
             else -> ValidationResult(true, "")
         }
     }

@@ -1,6 +1,7 @@
 package com.viarapida.app.ui.screens.payment
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -65,55 +66,28 @@ fun AddPaymentMethodScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Banner de Modo Demo
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE3F2FD) // Azul suave
-                ),
-                shape = MaterialTheme.shapes.medium,
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Modo Demostración",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Los métodos de pago agregados son solo para pruebas. No se guardará información bancaria real.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            lineHeight = 16.sp
-                        )
-                    }
-                }
-            }
+            // Banner de Modo Demo con Animación
+            AnimatedDemoBanner()
 
             Spacer(modifier = Modifier.height(24.dp))
+
             // Selector de tipo de pago
             Text(
                 text = "Tipo de Método",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // ✅ NUEVO: Helper text
+            Text(
+                text = "Selecciona cómo deseas pagar tus pasajes",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -145,50 +119,161 @@ fun AddPaymentMethodScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Checkbox predeterminado
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            // Checkbox predeterminado con explicación
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Checkbox(
-                    checked = uiState.isDefault,
-                    onCheckedChange = { viewModel.onDefaultChanged(it) }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Establecer como método predeterminado",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = uiState.isDefault,
+                        onCheckedChange = { viewModel.onDefaultChanged(it) }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Método predeterminado",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Se usará automáticamente en tus compras",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Error
+            // Error con animación
             AnimatedVisibility(visible = uiState.error.isNotEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                    ),
+                    shape = MaterialTheme.shapes.medium
                 ) {
-                    Text(
-                        text = uiState.error,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Error,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = uiState.error,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Botón guardar
-            CustomButton(
-                text = "Guardar Método de Pago",
-                onClick = { viewModel.savePaymentMethod() },
-                enabled = !uiState.isLoading,
-                icon = Icons.Default.Save
-            )
+            // Botón guardar con tooltip
+            Column {
+                CustomButton(
+                    text = "Guardar Método de Pago",
+                    onClick = { viewModel.savePaymentMethod() },
+                    enabled = !uiState.isLoading,
+                    icon = Icons.Default.Save
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // ✅ NUEVO: Mensaje de ayuda
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Podrás usarlo inmediatamente después de guardarlo",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+// ✅ NUEVO: Banner animado
+@Composable
+private fun AnimatedDemoBanner() {
+    val infiniteTransition = rememberInfiniteTransition(label = "demo banner")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.7f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFE3F2FD).copy(alpha = alpha)
+        ),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Modo Demostración",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Los métodos de pago agregados son solo para pruebas. No se guardará información bancaria real.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 16.sp
+                )
+            }
         }
     }
 }
@@ -245,7 +330,7 @@ private fun CardForm(
             value = uiState.cardNumber,
             onValueChange = { viewModel.onCardNumberChanged(it) },
             label = "Número de Tarjeta",
-            placeholder = "1234 5678 9012 3456",
+            placeholder = "4111 1111 1111 1111",
             leadingIcon = Icons.Default.CreditCard,
             isError = uiState.cardNumberError.isNotEmpty(),
             errorMessage = uiState.cardNumberError,
@@ -274,7 +359,7 @@ private fun CardForm(
             CustomTextField(
                 value = uiState.expiryDate,
                 onValueChange = { viewModel.onExpiryDateChanged(it) },
-                label = "Fecha Exp.",
+                label = "Vencimiento",
                 placeholder = "MM/YY",
                 leadingIcon = Icons.Default.CalendarToday,
                 isError = uiState.expiryDateError.isNotEmpty(),
@@ -295,53 +380,73 @@ private fun CardForm(
                 isPassword = true,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-// Card con ejemplos de tarjetas de prueba
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                ),
-                shape = MaterialTheme.shapes.medium
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ✅ MEJORADO: Card de tarjetas de prueba más visible
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+            ),
+            shape = MaterialTheme.shapes.medium,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(text = "💡", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "Tarjetas de Prueba",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
+                    Text(text = "💡", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = "• 4111 1111 1111 1111 → Siempre aprobada\n" +
-                                "• 5555 5555 5555 4444 → Siempre aprobada\n" +
-                                "• 4000 0000 0000 0002 → Siempre rechazada",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        lineHeight = 18.sp,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        text = "Tarjetas de Prueba Disponibles",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Lista de tarjetas con formato mejorado
+                TestCardRow("4111 1111 1111 1111", "VISA", "✅ Siempre aprobada")
+                Spacer(modifier = Modifier.height(8.dp))
+                TestCardRow("5555 5555 5555 4444", "Mastercard", "✅ Siempre aprobada")
+                Spacer(modifier = Modifier.height(8.dp))
+                TestCardRow("4000 0000 0000 0002", "VISA", "❌ Siempre rechazada")
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Divider()
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "📝 Datos adicionales:",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "• CVV: Cualquier 3 dígitos (ej: 123)\n• Fecha: Cualquier fecha futura (ej: 12/25)\n• Titular: Cualquier nombre",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    lineHeight = 18.sp
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
+        // Info de seguridad
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             )
         ) {
             Row(
@@ -351,7 +456,7 @@ private fun CardForm(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Info,
+                    imageVector = Icons.Default.Security,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
@@ -364,6 +469,39 @@ private fun CardForm(
                 )
             }
         }
+    }
+}
+
+// ✅ NUEVO: Componente para mostrar tarjetas de prueba
+@Composable
+private fun TestCardRow(number: String, brand: String, status: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = number,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Text(
+                text = brand,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+            )
+        }
+        Text(
+            text = status,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     }
 }
 
@@ -406,11 +544,11 @@ private fun DigitalWalletForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
             )
         ) {
             Row(
