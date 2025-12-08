@@ -66,8 +66,7 @@ fun AddPaymentMethodScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Banner de Modo Demo con Animación
-            AnimatedDemoBanner()
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -223,60 +222,7 @@ fun AddPaymentMethodScreen(
     }
 }
 
-// ✅ NUEVO: Banner animado
-@Composable
-private fun AnimatedDemoBanner() {
-    val infiniteTransition = rememberInfiniteTransition(label = "demo banner")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFE3F2FD).copy(alpha = alpha)
-        ),
-        shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Modo Demostración",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Los métodos de pago agregados son solo para pruebas. No se guardará información bancaria real.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 16.sp
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun PaymentTypeChip(
@@ -384,62 +330,8 @@ private fun CardForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ✅ MEJORADO: Card de tarjetas de prueba más visible
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-            ),
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = "💡", style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        text = "Tarjetas de Prueba Disponibles",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(12.dp))
 
-                // Lista de tarjetas con formato mejorado
-                TestCardRow("4111 1111 1111 1111", "VISA", "✅ Siempre aprobada")
-                Spacer(modifier = Modifier.height(8.dp))
-                TestCardRow("5555 5555 5555 4444", "Mastercard", "✅ Siempre aprobada")
-                Spacer(modifier = Modifier.height(8.dp))
-                TestCardRow("4000 0000 0000 0002", "VISA", "❌ Siempre rechazada")
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Divider()
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "📝 Datos adicionales:",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "• CVV: Cualquier 3 dígitos (ej: 123)\n• Fecha: Cualquier fecha futura (ej: 12/25)\n• Titular: Cualquier nombre",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    lineHeight = 18.sp
-                )
-            }
-        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
