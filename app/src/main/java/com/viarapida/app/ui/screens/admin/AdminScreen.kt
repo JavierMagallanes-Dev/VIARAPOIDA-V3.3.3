@@ -1,41 +1,31 @@
 package com.viarapida.app.ui.screens.admin
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.viarapida.app.data.model.Ticket
 import com.viarapida.app.ui.components.LoadingDialog
-import com.viarapida.app.ui.theme.StatusActive
-import com.viarapida.app.ui.theme.StatusUsed
+import com.viarapida.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,20 +34,50 @@ fun AdminScreen(
     viewModel: AdminViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showFilterMenu by remember { mutableStateOf(false) }
+    var selectedFilter by remember { mutableStateOf("Todos") }
 
     if (uiState.isLoading || uiState.isUpdating) {
         LoadingDialog(
-            message = if (uiState.isLoading) "Cargando tickets..." else "Actualizando..."
+            message = if (uiState.isLoading) "Cargando datos..." else "Actualizando..."
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Panel de Administración") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AdminPanelSettings,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Text(
+                            "Panel de Administración",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.loadAllTickets() }) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Actualizar",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -68,124 +88,131 @@ fun AdminScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
-                .padding(16.dp)
         ) {
-            // Error
-            if (uiState.error.isNotEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Error Alert
+                AnimatedVisibility(
+                    visible = uiState.error.isNotEmpty(),
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
                 ) {
-                    Text(
-                        text = uiState.error,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = uiState.error,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            // Estadísticas
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                // Dashboard de Estadísticas
+                AdminDashboard(
+                    totalTickets = uiState.totalTickets,
+                    activeTickets = uiState.activeTickets,
+                    usedTickets = uiState.usedTickets
                 )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "📊 Estadísticas",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    StatRow(
-                        label = "Total de pasajes",
-                        value = uiState.totalTickets.toString(),
-                        emoji = "🎫"
-                    )
-                    StatRow(
-                        label = "Pasajes activos",
-                        value = uiState.activeTickets.toString(),
-                        emoji = "✅",
-                        valueColor = StatusActive
-                    )
-                    StatRow(
-                        label = "Pasajes usados",
-                        value = uiState.usedTickets.toString(),
-                        emoji = "✔️",
-                        valueColor = StatusUsed
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Lista de tickets
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Todos los Pasajes",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                TextButton(onClick = { viewModel.loadAllTickets() }) {
-                    Text("🔄 Actualizar")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (uiState.tickets.isEmpty() && !uiState.isLoading) {
-                // Sin tickets
-                Card(
+                // Header de lista con filtro
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "No hay pasajes registrados en el sistema",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp)
+                        text = "Todos los Pasajes",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    FilterChip(
+                        selected = false,
+                        onClick = { showFilterMenu = !showFilterMenu },
+                        label = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FilterList,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(selectedFilter)
+                            }
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.tickets) { ticket ->
-                        AdminTicketCard(
-                            ticket = ticket,
-                            onMarkAsUsed = {
-                                if (ticket.isActive()) {
-                                    viewModel.markTicketAsUsed(ticket.id)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Lista de tickets
+                if (uiState.tickets.isEmpty() && !uiState.isLoading) {
+                    EmptyStateCard()
+                } else {
+                    val filteredTickets = when (selectedFilter) {
+                        "Activos" -> uiState.tickets.filter { it.isActive() }
+                        "Usados" -> uiState.tickets.filter { !it.isActive() }
+                        else -> uiState.tickets
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = filteredTickets,
+                            key = { it.id }
+                        ) { ticket ->
+                            EnhancedAdminTicketCard(
+                                ticket = ticket,
+                                onMarkAsUsed = {
+                                    if (ticket.isActive()) {
+                                        viewModel.markTicketAsUsed(ticket.id)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -194,99 +221,384 @@ fun AdminScreen(
 }
 
 @Composable
-private fun StatRow(
-    label: String,
-    value: String,
-    emoji: String,
-    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onPrimaryContainer
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = emoji,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-            color = valueColor
-        )
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-}
-
-@Composable
-private fun AdminTicketCard(
-    ticket: Ticket,
-    onMarkAsUsed: () -> Unit
+private fun AdminDashboard(
+    totalTickets: Int,
+    activeTickets: Int,
+    usedTickets: Int
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        )
+                    )
+                )
+                .padding(20.dp)
         ) {
-            // Encabezado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "ID: ${ticket.id.take(8)}...",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BarChart,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Estadísticas del Sistema",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatCard(
+                    icon = Icons.Default.ConfirmationNumber,
+                    value = totalTickets.toString(),
+                    label = "Total",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = ticket.status,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (ticket.isActive()) StatusActive else StatusUsed
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                StatCard(
+                    icon = Icons.Default.CheckCircle,
+                    value = activeTickets.toString(),
+                    label = "Activos",
+                    color = StatusActive,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                StatCard(
+                    icon = Icons.Default.Done,
+                    value = usedTickets.toString(),
+                    label = "Usados",
+                    color = StatusUsed,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Progress bar
+            val percentage = if (totalTickets > 0) {
+                (usedTickets.toFloat() / totalTickets.toFloat())
+            } else 0f
+
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Tasa de uso",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "${(percentage * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { percentage },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surface,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatCard(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Información
-            TicketInfoRow(label = "Pasajero", value = ticket.passengerName)
-            TicketInfoRow(label = "DNI", value = ticket.passengerDNI)
-            TicketInfoRow(label = "Usuario", value = ticket.userName)
-            TicketInfoRow(
-                label = "Ruta",
-                value = "${ticket.origin} → ${ticket.destination}"
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = color
             )
-            TicketInfoRow(label = "Salida", value = ticket.departureTime)
-            TicketInfoRow(label = "Asiento", value = ticket.seatNumber.toString())
-            TicketInfoRow(
-                label = "Precio",
-                value = "S/ ${String.format("%.2f", ticket.price)}"
-            )
-            TicketInfoRow(label = "Compra", value = ticket.getFormattedPurchaseDate())
 
-            // Botón de acción
-            if (ticket.isActive()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                TextButton(
-                    onClick = onMarkAsUsed,
-                    modifier = Modifier.fillMaxWidth()
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EnhancedAdminTicketCard(
+    ticket: Ticket,
+    onMarkAsUsed: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Header con gradiente
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = if (ticket.isActive()) {
+                                listOf(StatusActive.copy(alpha = 0.3f), StatusActive.copy(alpha = 0.1f))
+                            } else {
+                                listOf(StatusUsed.copy(alpha = 0.3f), StatusUsed.copy(alpha = 0.1f))
+                            }
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("✔️ Marcar como Usado")
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (ticket.isActive()) StatusActive.copy(alpha = 0.2f)
+                                    else StatusUsed.copy(alpha = 0.2f)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (ticket.isActive()) Icons.Default.ConfirmationNumber
+                                else Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = if (ticket.isActive()) StatusActive else StatusUsed,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Column {
+                            Text(
+                                text = "${ticket.origin} → ${ticket.destination}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "ID: ${ticket.id.take(8).uppercase()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (ticket.isActive()) StatusActive else StatusUsed
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = ticket.status,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Contenido expandible
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Info principal siempre visible
+                InfoRow(
+                    icon = Icons.Default.Person,
+                    label = "Pasajero",
+                    value = ticket.passengerName
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                InfoRow(
+                    icon = Icons.Default.AirlineSeatReclineNormal,
+                    label = "Asiento",
+                    value = "#${ticket.seatNumber}"
+                )
+
+                // Info expandible
+                AnimatedVisibility(visible = expanded) {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        InfoRow(
+                            icon = Icons.Default.Badge,
+                            label = "DNI",
+                            value = ticket.passengerDNI
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        InfoRow(
+                            icon = Icons.Default.AccountCircle,
+                            label = "Usuario",
+                            value = ticket.userName
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        InfoRow(
+                            icon = Icons.Default.AccessTime,
+                            label = "Salida",
+                            value = ticket.departureTime
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        InfoRow(
+                            icon = Icons.Default.AttachMoney,
+                            label = "Precio",
+                            value = "S/ ${String.format("%.2f", ticket.price)}"
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        InfoRow(
+                            icon = Icons.Default.CalendarToday,
+                            label = "Compra",
+                            value = ticket.getFormattedPurchaseDate()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Botones de acción
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { expanded = !expanded },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(if (expanded) "Menos" else "Más info")
+                    }
+
+                    if (ticket.isActive()) {
+                        Button(
+                            onClick = onMarkAsUsed,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = StatusActive
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Marcar Usado")
+                        }
+                    }
                 }
             }
         }
@@ -294,21 +606,80 @@ private fun AdminTicketCard(
 }
 
 @Composable
-private fun TicketInfoRow(label: String, value: String) {
+private fun InfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "$label:",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = "$label:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
         Text(
             text = value,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
         )
     }
-    Spacer(modifier = Modifier.height(4.dp))
+}
+
+@Composable
+private fun EmptyStateCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.SearchOff,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No hay pasajes registrados",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Los pasajes aparecerán aquí cuando se realicen compras",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
