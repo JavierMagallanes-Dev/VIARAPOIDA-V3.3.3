@@ -121,10 +121,8 @@ fun PurchaseScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Banner de Modo Demo
-            AnimatedDemoBanner()
-
-            Spacer(modifier = Modifier.height(16.dp))
+            // ❌ BANNER DE MODO DEMO ELIMINADO
+            // El banner azul "Modo Demostración" ha sido removido
 
             // Error mejorado
             AnimatedVisibility(
@@ -249,60 +247,6 @@ fun PurchaseScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun AnimatedDemoBanner() {
-    val infiniteTransition = rememberInfiniteTransition(label = "demo banner")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFE3F2FD).copy(alpha = alpha)
-        ),
-        shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Modo Demostración",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Los métodos de pago son simulados. No se procesará dinero real.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 16.sp
-                )
             }
         }
     }

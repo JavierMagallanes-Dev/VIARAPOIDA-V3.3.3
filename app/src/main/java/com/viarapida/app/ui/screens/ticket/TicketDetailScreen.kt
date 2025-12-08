@@ -4,10 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,20 +47,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.viarapida.app.ui.components.CustomButton
 import com.viarapida.app.ui.components.LoadingDialog
 import com.viarapida.app.ui.theme.GradientEnd
 import com.viarapida.app.ui.theme.GradientStart
 import com.viarapida.app.ui.theme.StatusActive
-import com.viarapida.app.ui.theme.StatusUsed
 import com.viarapida.app.ui.utils.QRCodeGenerator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -163,46 +157,8 @@ fun TicketDetailScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Banner de transacción demo
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFFFF3CD)
-                        ),
-                        shape = MaterialTheme.shapes.large,
-                        border = BorderStroke(2.dp, Color(0xFFFFCA28))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "⚠️",
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "TRANSACCIÓN DE PRUEBA",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF856404)
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "No se realizó ningún cargo real. Esta es una demostración del sistema.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF856404),
-                                    lineHeight = 16.sp
-                                )
-                            }
-                        }
-                    }
+                    // ❌ BANNER DE PRUEBA ELIMINADO
+                    // El banner amarillo de "TRANSACCIÓN DE PRUEBA" ha sido removido
 
                     Spacer(modifier = Modifier.height(24.dp))
 
