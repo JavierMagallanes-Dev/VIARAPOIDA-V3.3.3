@@ -408,6 +408,11 @@ class PurchaseViewModel(
                 }
             } else {
                 // PAGO FALLIDO
+
+
+                // En PurchaseViewModel.kt, REEMPLAZA la parte del PAGO FALLIDO (línea ~350) con esto:
+
+// PAGO FALLIDO
                 Log.e(TAG, "Pago rechazado (simulado)")
 
                 _uiState.value = _uiState.value.copy(
@@ -425,14 +430,28 @@ class PurchaseViewModel(
                 paymentRepository.updateTransactionStatus(
                     transactionId,
                     TransactionStatus.FAILED,
-                    "Pago rechazado: Fondos insuficientes (simulado)"
+                    "Fondos insuficientes"
                 )
 
+// ✅ MENSAJE DE ERROR MEJORADO
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     paymentProcessState = null,
-                    error = "❌ Pago rechazado\n\nRazón: Fondos insuficientes (simulado)\n\nIntenta con otra tarjeta de prueba:\n• 4111 1111 1111 1111 (Aprobada)\n• 5555 5555 5555 4444 (Aprobada)"
+                    error = """
+        ⚠️ Transacción Rechazada
+        
+        La operación no pudo completarse debido a fondos insuficientes.
+        
+        💡 Soluciones:
+        • Verifica el saldo disponible en tu tarjeta
+        • Prueba con otro método de pago
+        • Contacta a tu banco si el problema persiste
+    """.trimIndent()
                 )
+
+
+
+
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error en procesamiento de pago: ${e.message}", e)
