@@ -133,45 +133,64 @@ class RouteRepositoryImpl : RouteRepository {
 
     override suspend fun createInitialRoutes(): Result<Unit> {
         return try {
-            Log.d(TAG, "Creando rutas iniciales")
+            Log.d(TAG, "Creando rutas para la próxima semana")
 
             val initialRoutes = listOf(
+                // RUTA 1: Ayacucho → Lima (Lunes 08:00 AM)
                 Route(
                     origin = "Ayacucho",
                     destination = "Lima",
-                    departureTime = "08:00 AM",
+                    departureTime = "Lunes 08:00 AM",
                     price = 50.0,
                     totalSeats = 40,
                     occupiedSeats = emptyList()
                 ),
+
+                // RUTA 2: Ayacucho → Lima (Miércoles 10:00 PM)
                 Route(
                     origin = "Ayacucho",
                     destination = "Lima",
-                    departureTime = "10:00 PM",
+                    departureTime = "Miércoles 10:00 PM",
                     price = 45.0,
                     totalSeats = 40,
                     occupiedSeats = emptyList()
                 ),
+
+                // RUTA 3: Lima → Ayacucho (Martes 09:00 PM)
                 Route(
                     origin = "Lima",
                     destination = "Ayacucho",
-                    departureTime = "09:00 PM",
+                    departureTime = "Martes 09:00 PM",
                     price = 50.0,
                     totalSeats = 40,
                     occupiedSeats = emptyList()
                 ),
+
+                // RUTA 4: Lima → Ayacucho (Jueves 09:00 PM)
+                Route(
+                    origin = "Lima",
+                    destination = "Ayacucho",
+                    departureTime = "Jueves 09:00 PM",
+                    price = 50.0,
+                    totalSeats = 40,
+                    occupiedSeats = emptyList()
+                ),
+
+                // RUTA 5: Ayacucho → Huancayo (Miércoles 06:00 AM)
                 Route(
                     origin = "Ayacucho",
                     destination = "Huancayo",
-                    departureTime = "06:00 AM",
+                    departureTime = "Miércoles 06:00 AM",
                     price = 30.0,
                     totalSeats = 40,
                     occupiedSeats = emptyList()
                 ),
+
+                // RUTA 6: Huancayo → Ayacucho (Viernes 07:00 AM)
                 Route(
                     origin = "Huancayo",
                     destination = "Ayacucho",
-                    departureTime = "07:00 AM",
+                    departureTime = "Viernes 07:00 AM",
                     price = 30.0,
                     totalSeats = 40,
                     occupiedSeats = emptyList()
@@ -184,11 +203,11 @@ class RouteRepositoryImpl : RouteRepository {
                     .await()
             }
 
-            Log.d(TAG, "Rutas iniciales creadas: ${initialRoutes.size}")
+            Log.d(TAG, "✅ ${initialRoutes.size} rutas creadas exitosamente")
             Result.success(Unit)
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error creando rutas iniciales: ${e.message}", e)
+            Log.e(TAG, "❌ Error creando rutas: ${e.message}", e)
             Result.failure(e)
         }
     }
