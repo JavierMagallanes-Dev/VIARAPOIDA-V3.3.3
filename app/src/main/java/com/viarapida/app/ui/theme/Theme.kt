@@ -15,32 +15,57 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryLight,
     onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnBackground,
     secondary = SecondaryLight,
     onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnBackground,
+    tertiary = TertiaryLight,
+    onTertiary = OnPrimary,
     background = BackgroundDark,
     onBackground = Color.White,
     surface = SurfaceDark,
     onSurface = Color.White,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = Color(0xFFCBD5E1),
     error = StatusError,
-    outline = Outline
+    onError = Color.White,
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+    outline = Outline,
+    outlineVariant = Color(0xFF475569)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Primary,
     onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = Primary,
     secondary = Secondary,
     onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = Secondary,
+    tertiary = Tertiary,
+    onTertiary = OnPrimary,
     background = BackgroundLight,
     onBackground = OnBackground,
     surface = SurfaceLight,
     onSurface = OnSurface,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariant,
     error = StatusError,
-    outline = Outline
+    onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF93000A),
+    outline = Outline,
+    outlineVariant = Color(0xFFE2E8F0)
 )
 
 @Composable
 fun ViaRapidaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // ✅ CAMBIO IMPORTANTE: Por defecto SIEMPRE modo claro
+    darkTheme: Boolean = false, // Cambiado de isSystemInDarkTheme() a false
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -52,7 +77,14 @@ fun ViaRapidaTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
+            // Status bar color según el tema
+            window.statusBarColor = if (darkTheme) {
+                colorScheme.surface.toArgb()
+            } else {
+                colorScheme.primary.toArgb()
+            }
+
+            // Iconos del status bar: oscuros en tema claro, claros en tema oscuro
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
@@ -60,6 +92,7 @@ fun ViaRapidaTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }
